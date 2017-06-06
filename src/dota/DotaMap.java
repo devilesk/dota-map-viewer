@@ -1,4 +1,4 @@
-package sample;
+package dota;
 
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.shape.Circle;
@@ -9,18 +9,18 @@ import javafx.collections.FXCollections;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class DotaMap {
+class DotaMap {
     public static final String mapImage = "dotamap5_25.jpg";
-    public static final Integer map_w = 16384;
-    public static final Integer map_h = 16384;
-    public static final float map_x_min = -8507.4f;
-    public static final float map_x_max = 9515;
-    public static final float map_y_min = 8888.12001679f;
-    public static final float map_y_max = -8953.45782627f;
-    public Integer zoom_level = 4;
+    private static final Integer map_w = 16384;
+    private static final Integer map_h = 16384;
+    private static final float map_x_min = -8507.4f;
+    private static final float map_x_max = 9515;
+    private static final float map_y_min = 8888.12001679f;
+    private static final float map_y_max = -8953.45782627f;
+    private Integer zoom_level = 4;
     public static Integer gameStartTime = 0;
 
-    ObservableList<Entry> wardsView = FXCollections.observableArrayList();
+    final ObservableList<Entry> wardsView = FXCollections.observableArrayList();
     private List<Entry> wards = null;
 
     public void initWards(List<Entry> c) {
@@ -28,7 +28,7 @@ public class DotaMap {
         setWards(wards);
     }
 
-    public void setWards(List<Entry> c) {
+    private void setWards(List<Entry> c) {
         wardsView.clear();
         wardsView.addAll(c);
     }
@@ -52,11 +52,11 @@ public class DotaMap {
         wardsView.addAll(wards.stream().filter(o -> (float) o.time <= t && (o.expireTime == null || (float) o.expireTime > t)).collect(Collectors.toList()));
     }
 
-    public static float reverseLerp(float minVal, float maxVal, float pos) {
+    private static float reverseLerp(float minVal, float maxVal, float pos) {
         return (pos - minVal) / (maxVal - minVal);
     }
 
-    public Point2D worldToLatLon(float x, float y) {
+    private Point2D worldToLatLon(float x, float y) {
         Point2D pt = new Point2D.Float(
                 reverseLerp(map_x_min, map_x_max, x) * map_w / (float)Math.pow(2, zoom_level),
                 reverseLerp(map_y_min, map_y_max, y) * map_h / (float)Math.pow(2, zoom_level)
@@ -65,7 +65,7 @@ public class DotaMap {
         return pt;
     }
 
-    public Point2D entryToLatLon(Entry entry) {
+    private Point2D entryToLatLon(Entry entry) {
         return worldToLatLon(entry.getWorldX(), entry.getWorldY());
     }
 

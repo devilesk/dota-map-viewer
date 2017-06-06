@@ -1,8 +1,8 @@
-package sample;
+package dota;
 
 import javafx.scene.control.ListCell;
 
-public class WardListViewCell extends ListCell<Entry> {
+class WardListViewCell extends ListCell<Entry> {
 
     @Override
     protected void updateItem(Entry entry, boolean empty) {

@@ -1,10 +1,10 @@
-package sample;
+package dota;
 
 import javafx.scene.paint.Color;
 import java.time.LocalTime;
 
-public class Entry {
-    public Integer time;
+class Entry {
+    public final Integer time;
     public String type;
     public String key;
     public Integer slot;
