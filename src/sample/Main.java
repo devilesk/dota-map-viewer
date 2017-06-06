@@ -4,70 +4,53 @@ import javafx.application.Application;
 import javafx.geometry.Insets;
 import javafx.scene.Group;
 import javafx.scene.Scene;
+import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.scene.layout.GridPane;
 import javafx.scene.layout.AnchorPane;
-import javafx.scene.layout.HBox;
+import javafx.scene.layout.GridPane;
 import javafx.scene.paint.Color;
-import javafx.stage.Stage;
 import javafx.stage.FileChooser;
-import javafx.scene.control.Button;
-import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.InputStream;
-import java.util.List;
-import javafx.scene.shape.Circle;
-import javafx.scene.paint.Paint;
-import java.awt.geom.Point2D;
+import javafx.stage.Stage;
+import javafx.util.Duration;
+import javafx.util.StringConverter;
+import org.apache.commons.compress.compressors.bzip2.BZip2CompressorInputStream;
+
+import java.io.*;
+import java.util.concurrent.TimeUnit;
 
 public class Main extends Application {
 
     final AnchorPane mapRegion = new AnchorPane();
-
-    final Integer map_w = 1024;
-    final Integer map_h = 1024;
-    final float map_x_min = -8507.4f / 2;
-    final float map_x_max = 9515 / 2;
-    final float map_y_min = 8888.12001679f / 2;
-    final float map_y_max = -8953.45782627f / 2;
+    final DotaMap map = new DotaMap();
+    final ImageView mapBackground = new ImageView();
+    final Slider slider = new Slider();
 
     public static void main(String[] args) {
         Application.launch(args);
     }
 
-    public float reverseLerp(float minVal, float maxVal, float pos) {
-        return (pos - minVal) / (maxVal - minVal);
-    }
-
-    public Point2D worldToLatLon(float x, float y) {
-        Point2D pt = new Point2D.Float(
-                reverseLerp(map_x_min, map_x_max, x) * map_w,
-                reverseLerp(map_y_min, map_y_max, y) * map_h
-        );
-        System.out.printf("(%s, %s), (%s, %s)\n", x, y, pt.getX(), pt.getY());
-        return pt;
+    public InputStream readFile(File file) throws IOException {
+        try {
+            InputStream stream = new FileInputStream(file);
+            BufferedInputStream bstream = new BufferedInputStream(stream);
+            return new BZip2CompressorInputStream(bstream);
+        }
+        catch (IOException e) {
+            return new FileInputStream(file);
+        }
     }
 
     public void openReplay(File file) {
         try {
-            InputStream stream = new FileInputStream(file);
+            InputStream stream = readFile(file);
             Parse parser = new Parse(stream);
-            List<Parse.Entry> wards = parser.wards;
-            for (Parse.Entry ward : wards) {
-                Point2D pt = worldToLatLon((ward.x) * 64 - 8288, (ward.y) * 64 - 8288);
-                System.out.printf("slot: %s, type: %s, loc: (%s, %s, %s)\n", ward.slot, ward.type, ward.x, ward.y, ward.z);
-
-                Circle circle = new Circle();
-                circle.setRadius(3);
-                circle.setCenterX(pt.getX());
-                circle.setCenterY(pt.getY());
-                circle.setFill(Paint.valueOf("RED"));
-
-                mapRegion.getChildren().add(circle);
-            }
+            stream.close();
+            clearMap();
+            DotaMap.gameStartTime = parser.gameStartTime;
+            map.initWards(parser.wards);
+            map.render(mapRegion);
+            slider.setMax(parser.gameEndTime);
         }
         catch (Exception ex)
         {
@@ -75,19 +58,21 @@ public class Main extends Application {
         }
     }
 
+    public void clearMap() {
+        mapRegion.getChildren().clear();
+        mapRegion.getChildren().add(mapBackground);
+    }
+
     @Override
     public void start(Stage primaryStage) {
         final FileChooser fileChooser = new FileChooser();
-        final Button openButton = new Button("Open a replay...");
 
+        final Button openButton = new Button("Open a replay...");
         openButton.setOnAction(
-                new EventHandler<ActionEvent>() {
-                    @Override
-                    public void handle(final ActionEvent e) {
-                        File file = fileChooser.showOpenDialog(primaryStage);
-                        if (file != null) {
-                            openReplay(file);
-                        }
+                e -> {
+                    File file = fileChooser.showOpenDialog(primaryStage);
+                    if (file != null) {
+                        openReplay(file);
                     }
                 });
 
@@ -95,24 +80,154 @@ public class Main extends Application {
         Group root = new Group();
         Scene scene = new Scene(root, 600, 330, Color.WHITE);
 
+        ScrollPane s1 = new ScrollPane();
+        s1.setPrefSize(500, 500);
+        s1.setPannable(true);
+
         GridPane gridpane = new GridPane();
         gridpane.setPadding(new Insets(5));
         gridpane.setHgap(10);
         gridpane.setVgap(10);
 
-        final ImageView imv = new ImageView();
-        final Image image2 = new Image(Main.class.getResourceAsStream("dotamap5_25.jpg"));
-        imv.setImage(image2);
+        final Image im = new Image(Main.class.getResourceAsStream(DotaMap.mapImage));
+        mapBackground.setImage(im);
+        gridpane.add(s1, 1, 4);
 
-        mapRegion.getChildren().add(imv);
-        gridpane.add(mapRegion, 1, 2);
+        s1.setContent(mapRegion);
+
+        mapRegion.setPrefSize(1024, 1024);
+        mapRegion.getChildren().add(mapBackground);
 
         GridPane.setConstraints(openButton, 0, 0);
         gridpane.add(openButton, 1, 1);
 
+        GridPane btnContainer = new GridPane();
+        btnContainer.setHgap(10);
+        gridpane.add(btnContainer, 2, 3);
+
+        Label showLabel = new Label("Show:");
+        btnContainer.add(showLabel, 1, 1);
+
+        final Button showAll = new Button("All");
+        showAll.setOnAction(
+                e -> {
+                    clearMap();
+                    map.filterNone();
+                    map.render(mapRegion);
+                });
+        GridPane.setConstraints(showAll, 0, 0);
+        btnContainer.add(showAll, 2, 1);
+
+        final Button showObserver = new Button("Observer");
+        showObserver.setOnAction(
+                e -> {
+                    clearMap();
+                    map.filterSentry();
+                    map.render(mapRegion);
+                });
+        GridPane.setConstraints(showObserver, 0, 0);
+        btnContainer.add(showObserver, 3, 1);
+
+        final Button showSentry = new Button("Sentry");
+        showSentry.setOnAction(
+                e -> {
+                    clearMap();
+                    map.filterObserver();
+                    map.render(mapRegion);
+                });
+        GridPane.setConstraints(showSentry, 0, 0);
+        btnContainer.add(showSentry, 4, 1);
+
+        ListView<Entry> list = new ListView<>();
+        list.setItems(map.wardsView);
+        list.setCellFactory(listView -> new WardListViewCell());
+        list.getSelectionModel().selectedItemProperty().addListener(
+                (ov, old_val, new_val) -> {
+                    clearMap();
+                    map.render(mapRegion, new_val);
+                });
+        gridpane.add(list, 2, 4);
+
+        Label sliderLabel = new Label("00:00:00");
+        gridpane.add(sliderLabel, 2, 2);
+
+        slider.setMin(0);
+        slider.setMax(100);
+        slider.setValue(0);
+        slider.setShowTickLabels(true);
+        slider.setShowTickMarks(true);
+        slider.setMajorTickUnit(300);
+        slider.setMinorTickCount(5);
+        slider.setBlockIncrement(10);
+        slider.valueProperty().addListener((ov, old_val, new_val) -> {
+            sliderLabel.setText(String.format("%.2f", new_val.floatValue()));
+            clearMap();
+            map.filterTimeGreaterThan(new_val.floatValue());
+            map.render(mapRegion);
+        });
+        StringConverter<Double> stringConverter = new StringConverter<Double>() {
+            @Override
+            public String toString(Double object) {
+                long rawSeconds = object.longValue() - DotaMap.gameStartTime;
+                long seconds = Math.abs(rawSeconds);
+                long minutes = TimeUnit.SECONDS.toMinutes(seconds);
+                long remainingseconds = seconds - TimeUnit.MINUTES.toSeconds(minutes);
+                if (rawSeconds < 0) {
+                    return String.format("-%02d", minutes) + ":" + String.format("%02d", remainingseconds);
+                }
+                else {
+                    return String.format("%02d", minutes) + ":" + String.format("%02d", remainingseconds);
+                }
+            }
+
+            @Override
+            public Double fromString(String string) {
+                return null;
+            }
+        };
+        slider.setLabelFormatter(stringConverter);
+        gridpane.add(slider, 1, 2);
 
         root.getChildren().add(gridpane);
         primaryStage.setScene(scene);
         primaryStage.show();
+    }
+
+    private static String formatTime(Duration elapsed, Duration duration) {
+        int intElapsed = (int) Math.floor(elapsed.toSeconds());
+        int elapsedHours = intElapsed / (60 * 60);
+        if (elapsedHours > 0) {
+            intElapsed -= elapsedHours * 60 * 60;
+        }
+        int elapsedMinutes = intElapsed / 60;
+        int elapsedSeconds = intElapsed - elapsedHours * 60 * 60 - elapsedMinutes * 60;
+
+        if (duration.greaterThan(Duration.ZERO)) {
+            int intDuration = (int) Math.floor(duration.toSeconds());
+            int durationHours = intDuration / (60 * 60);
+            if (durationHours > 0) {
+                intDuration -= durationHours * 60 * 60;
+            }
+            int durationMinutes = intDuration / 60;
+            int durationSeconds = intDuration - durationHours * 60 * 60 - durationMinutes * 60;
+
+            if (durationHours > 0) {
+                return String.format("%d:%02d:%02d/%d:%02d:%02d",
+                        elapsedHours, elapsedMinutes, elapsedSeconds,
+                        durationHours, durationMinutes, durationSeconds);
+            } else {
+                return String.format("%02d:%02d/%02d:%02d",
+                        elapsedMinutes, elapsedSeconds,
+                        durationMinutes, durationSeconds);
+            }
+        } else {
+            if (elapsedHours > 0) {
+                return String.format("%d:%02d:%02d",
+                        elapsedHours, elapsedMinutes, elapsedSeconds);
+            } else {
+                return String.format("%02d:%02d",
+                        elapsedMinutes, elapsedSeconds);
+            }
+        }
     }
 }

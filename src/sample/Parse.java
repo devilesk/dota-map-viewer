@@ -16,32 +16,16 @@ import skadistats.clarity.source.InputStreamSource;
 import java.util.*;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 
 public class Parse {
 
-    public class Entry {
-        public Integer time;
-        public String type;
-        public String key;
-        public Integer slot;
-        public Integer x;
-        public Integer y;
-        public Integer z;
-        public Boolean entityleft;
-        public Integer ehandle;
 
-        public Entry() {
-        }
-
-        public Entry(Integer time) {
-            this.time = time;
-        }
-    }
 
     Integer time = 0;
     InputStream is = null;
-    List<Entry> wards = new ArrayList<Entry>();
+    List<Entry> wards = new ArrayList<>();
+    Integer gameStartTime = 0;
+    Integer gameEndTime = 0;
 
     public Parse(InputStream input) throws IOException
     {
@@ -52,9 +36,30 @@ public class Parse {
         System.err.format("total time taken: %s\n", (tMatch) / 1000.0);
     }
 
+    public static Entry findWard(List<Entry> c, Entry e) {
+        for (Entry o : c) {
+            if(o != null && o.key.equals(e.key) && o.ehandle.equals(e.ehandle)) {
+                return o;
+            }
+        }
+        return null;
+    }
 
     public void output(Entry e) {
-        wards.add(e);
+        Entry o = findWard(wards, e);
+        if (o != null) {
+            if (e.isDead()) {
+                System.out.printf("ward expire (%s, %s) %s\n", e.x, e.y, e.ehandle);
+                o.expireTime = e.time;
+            }
+            else {
+                System.out.printf("ward exists (%s, %s) %s\n", e.x, e.y, e.ehandle);
+            }
+        }
+        else {
+            System.out.printf("ward add (%s, %s) %s\n", e.x, e.y, e.ehandle);
+            wards.add(e);
+        }
     }
 
     @OnEntityEntered
@@ -82,7 +87,21 @@ public class Parse {
             //System.err.println(grp);
             //dota_gamerules_data.m_iGameMode = 22
             //dota_gamerules_data.m_unMatchID64 = 1193091757
-            time = Math.round((float) getEntityProperty(grp, "m_pGameRules.m_fGameTime", null));
+            time = Math.round(getEntityProperty(grp, "m_pGameRules.m_fGameTime", null));
+
+            int currGameStartTime = Math.round(grp.getProperty("m_pGameRules.m_flGameStartTime"));
+            if (currGameStartTime != gameStartTime) {
+                gameStartTime = currGameStartTime;
+                System.err.println(gameStartTime);
+                System.err.println(time);
+            }
+
+            int currGameEndTime = Math.round(grp.getProperty("m_pGameRules.m_flGameEndTime"));
+            if (currGameEndTime != gameEndTime) {
+                gameEndTime = currGameEndTime;
+                System.err.println(gameEndTime);
+                System.err.println(time);
+            }
         }
     }
 
@@ -116,18 +135,15 @@ public class Parse {
             Integer x = getEntityProperty(e, "CBodyComponent.m_cellX", null);
             Integer y = getEntityProperty(e, "CBodyComponent.m_cellY", null);
             Integer z = getEntityProperty(e, "CBodyComponent.m_cellZ", null);
+            float vecX = getEntityProperty(e, "CBodyComponent.m_vecX", null);
+            float vecY = getEntityProperty(e, "CBodyComponent.m_vecY", null);
             Integer[] pos = {x, y};
             entry.x = x;
             entry.y = y;
             entry.z = z;
-            if (entityLeft)
-            {
-                entry.type = isObserver ? "obs_left" : "sen_left";
-            }
-            else
-            {
-                entry.type = isObserver ? "obs" : "sen";
-            }
+            entry.vecX = vecX;
+            entry.vecY = vecY;
+            entry.type = isObserver ? "obs" : "sen";
             entry.key = Arrays.toString(pos);
             entry.entityleft = entityLeft;
             entry.ehandle = e.getHandle();
