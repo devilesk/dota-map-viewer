@@ -1,4 +1,4 @@
-package sample;
+package dota;
 
 import skadistats.clarity.decoder.Util;
 import skadistats.clarity.model.Entity;
@@ -19,24 +19,20 @@ import java.io.InputStream;
 
 public class Parse {
 
-
-
-    Integer time = 0;
-    InputStream is = null;
-    List<Entry> wards = new ArrayList<>();
+    private Integer time = 0;
+    final List<Entry> wards = new ArrayList<>();
     Integer gameStartTime = 0;
     Integer gameEndTime = 0;
 
     public Parse(InputStream input) throws IOException
     {
-        is = input;
         long tStart = System.currentTimeMillis();
-        new SimpleRunner(new InputStreamSource(is)).runWith(this);
+        new SimpleRunner(new InputStreamSource(input)).runWith(this);
         long tMatch = System.currentTimeMillis() - tStart;
         System.err.format("total time taken: %s\n", (tMatch) / 1000.0);
     }
 
-    public static Entry findWard(List<Entry> c, Entry e) {
+    private static Entry findWard(List<Entry> c, Entry e) {
         for (Entry o : c) {
             if(o != null && o.key.equals(e.key) && o.ehandle.equals(e.ehandle)) {
                 return o;
@@ -45,7 +41,7 @@ public class Parse {
         return null;
     }
 
-    public void output(Entry e) {
+    private void output(Entry e) {
         Entry o = findWard(wards, e);
         if (o != null) {
             if (e.isDead()) {
@@ -105,7 +101,7 @@ public class Parse {
         }
     }
 
-    public <T> T getEntityProperty(Entity e, String property, Integer idx) {
+    private <T> T getEntityProperty(Entity e, String property, Integer idx) {
         try {
             if (e == null) {
                 return null;
@@ -121,7 +117,7 @@ public class Parse {
         }
     }
 
-    public void processEntity(Context ctx, Entity e, boolean entityLeft)
+    private void processEntity(Context ctx, Entity e, boolean entityLeft)
     {
         //CDOTA_NPC_Observer_Ward
         //CDOTA_NPC_Observer_Ward_TrueSight

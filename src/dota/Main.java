@@ -1,4 +1,4 @@
-package sample;
+package dota;
 
 import javafx.application.Application;
 import javafx.geometry.Insets;
@@ -21,16 +21,16 @@ import java.util.concurrent.TimeUnit;
 
 public class Main extends Application {
 
-    final AnchorPane mapRegion = new AnchorPane();
-    final DotaMap map = new DotaMap();
-    final ImageView mapBackground = new ImageView();
-    final Slider slider = new Slider();
+    private final AnchorPane mapRegion = new AnchorPane();
+    private final DotaMap map = new DotaMap();
+    private final ImageView mapBackground = new ImageView();
+    private final Slider slider = new Slider();
 
     public static void main(String[] args) {
         Application.launch(args);
     }
 
-    public InputStream readFile(File file) throws IOException {
+    private InputStream readFile(File file) throws IOException {
         try {
             InputStream stream = new FileInputStream(file);
             BufferedInputStream bstream = new BufferedInputStream(stream);
@@ -41,7 +41,7 @@ public class Main extends Application {
         }
     }
 
-    public void openReplay(File file) {
+    private void openReplay(File file) {
         try {
             InputStream stream = readFile(file);
             Parse parser = new Parse(stream);
@@ -58,7 +58,7 @@ public class Main extends Application {
         }
     }
 
-    public void clearMap() {
+    private void clearMap() {
         mapRegion.getChildren().clear();
         mapRegion.getChildren().add(mapBackground);
     }
