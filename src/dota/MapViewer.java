@@ -1,34 +1,30 @@
 package dota;
 
-import javafx.fxml.FXML;
-import javafx.scene.control.CheckBox;
-import javafx.scene.control.ChoiceBox;
-import javafx.scene.control.Label;
-import javafx.scene.control.ProgressBar;
-import javafx.scene.control.Slider;
-import javafx.scene.control.TableView;
-import javafx.scene.control.TableColumn;
-import javafx.scene.image.ImageView;
-import javafx.scene.layout.AnchorPane;
-
-import javafx.scene.control.cell.PropertyValueFactory;
-import javafx.event.ActionEvent;
-import javafx.stage.Stage;
-import org.apache.commons.compress.compressors.bzip2.BZip2CompressorInputStream;
-import javafx.stage.FileChooser;
-import javafx.util.StringConverter;
-import java.util.concurrent.TimeUnit;
-import javafx.collections.FXCollections;
-
 import javafx.application.Platform;
-import java.util.List;
-import java.util.ArrayList;
-import java.util.Arrays;
+import javafx.collections.FXCollections;
 import javafx.concurrent.Task;
 import javafx.concurrent.WorkerStateEvent;
+import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
+import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
+import javafx.scene.control.*;
+import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.image.ImageView;
+import javafx.scene.layout.AnchorPane;
+import javafx.stage.FileChooser;
+import javafx.stage.Modality;
+import javafx.stage.Stage;
+import javafx.util.StringConverter;
+import org.apache.commons.compress.compressors.bzip2.BZip2CompressorInputStream;
 
 import java.io.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 public class MapViewer {
 
@@ -140,6 +136,10 @@ public class MapViewer {
         longTask.setOnSucceeded(new EventHandler<WorkerStateEvent>() {
             @Override
             public void handle(WorkerStateEvent t) {
+                for (int i = 0; i < 10; i++) {
+                    cbPlayers.get(i).setText("");
+                }
+                sliderLabel.setText(formatTime((int)slider.getValue()));
                 clearMap();
                 DotaMap.gameStartTime = parser.gameStartTime;
                 map.init(parser);
@@ -182,6 +182,19 @@ public class MapViewer {
         if (file != null) {
             openReplay(file);
         }
+    }
+
+    public void handleAbout(ActionEvent actionEvent) throws IOException {
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("AboutDialog.fxml"));
+        Parent root = loader.load();
+        Stage stage = new Stage();
+        stage.setScene(new Scene(root));
+        stage.setResizable(false);
+        stage.setTitle("About Dota Map Viewer");
+        stage.setAlwaysOnTop(true);
+        stage.setIconified(false);
+        stage.initModality(Modality.APPLICATION_MODAL);
+        stage.show();
     }
 
     public void handleQuit(ActionEvent actionEvent) {
@@ -252,7 +265,7 @@ public class MapViewer {
 
         cbPlayers = new ArrayList<>(Arrays.asList(cbPlayer0, cbPlayer1, cbPlayer2, cbPlayer3, cbPlayer4, cbPlayer5, cbPlayer6, cbPlayer7, cbPlayer8, cbPlayer9));
 
-        wardTypeFilter.setItems(FXCollections.observableArrayList("Observer & Sentry", "Observer Only", "Sentry Only"));
+        wardTypeFilter.setItems(FXCollections.observableArrayList("Obs & Sentry", "Obs Only", "Sentry Only"));
         wardTypeFilter.getSelectionModel().selectedIndexProperty().addListener((ov, value, new_value) -> {
             map.filterType = new_value.intValue();
             clearMap();
@@ -304,6 +317,7 @@ public class MapViewer {
             }
         };
         slider.setLabelFormatter(stringConverter);
+        sliderLabel.setText(formatTime((int)slider.getValue()));
     }
 
     private static String formatTime(Integer intElapsed) {

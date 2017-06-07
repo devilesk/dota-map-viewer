@@ -65,12 +65,7 @@ class DotaMap {
     }
 
     public static List<Entry> filterPlayers(List<Entry> wards, List<Boolean> playerFilter) {
-        List<Entry> list = new ArrayList<>();
-        for (Entry o : wards) {
-            if (playerFilter.get(o.slot)) {
-                list.add(o);
-            }
-        }
+        List<Entry> list = wards.stream().filter(o -> playerFilter.get(o.slot)).collect(Collectors.toList());
         return list;
     }
 
@@ -133,6 +128,8 @@ class DotaMap {
         System.out.printf("slot: %s, type: %s, loc: (%s, %s, %s), vec: (%s, %s), isDead: %s, ehandle: %s, expireTime: %s\n", ward.slot, ward.type, ward.x, ward.y, ward.z, ward.vecX, ward.vecY, ward.isDead(), ward.ehandle, ward.expireTime);
 
         Circle circle = new Circle(pt.getX(), pt.getY(), ward.getRadius(), ward.getColor());
+        circle.setStroke(ward.getTeamColor());
+        circle.setStrokeWidth(3);
         mapRegion.getChildren().add(circle);
     }
 }

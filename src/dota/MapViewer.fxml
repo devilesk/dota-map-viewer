@@ -34,7 +34,7 @@
         </Menu>
         <Menu mnemonicParsing="false" text="Help">
           <items>
-            <MenuItem mnemonicParsing="false" text="About Dota Map Viewer" />
+            <MenuItem mnemonicParsing="false" onAction="#handleAbout" text="About Dota Map Viewer" />
           </items>
         </Menu>
       </menus>
@@ -43,12 +43,12 @@
          <left>
             <VBox prefHeight="200.0" prefWidth="150.0" spacing="10.0" BorderPane.alignment="CENTER">
                <children>
-                  <VBox prefHeight="59.0" prefWidth="90.0">
+                  <HBox prefHeight="17.0" prefWidth="140.0" spacing="5.0">
                      <children>
-                        <Label text="Ward Type" />
-                        <ChoiceBox fx:id="wardTypeFilter" prefWidth="150.0" />
+                        <Label maxHeight="1.7976931348623157E308" text="Show" HBox.hgrow="ALWAYS" />
+                        <ChoiceBox fx:id="wardTypeFilter" maxWidth="1.7976931348623157E308" prefHeight="25.0" HBox.hgrow="ALWAYS" />
                      </children>
-                  </VBox>
+                  </HBox>
                   <VBox prefHeight="131.0" prefWidth="90.0" spacing="5.0">
                      <children>
                         <CheckBox fx:id="cbRadiant" mnemonicParsing="false" onAction="#handleCheckBox" selected="true" text="Radiant">
@@ -56,11 +56,11 @@
                               <Font name="System Bold" size="12.0" />
                            </font>
                         </CheckBox>
-                        <CheckBox fx:id="cbPlayer0" mnemonicParsing="false" onAction="#handleCheckBox" selected="true" text="CheckBox" />
-                        <CheckBox fx:id="cbPlayer1" mnemonicParsing="false" onAction="#handleCheckBox" selected="true" text="CheckBox" />
-                        <CheckBox fx:id="cbPlayer2" mnemonicParsing="false" onAction="#handleCheckBox" selected="true" text="CheckBox" />
-                        <CheckBox fx:id="cbPlayer3" mnemonicParsing="false" onAction="#handleCheckBox" selected="true" text="CheckBox" />
-                        <CheckBox fx:id="cbPlayer4" mnemonicParsing="false" onAction="#handleCheckBox" selected="true" text="CheckBox" />
+                        <CheckBox fx:id="cbPlayer0" mnemonicParsing="false" onAction="#handleCheckBox" selected="true" text="Player 1" />
+                        <CheckBox fx:id="cbPlayer1" mnemonicParsing="false" onAction="#handleCheckBox" selected="true" text="Player 2" />
+                        <CheckBox fx:id="cbPlayer2" mnemonicParsing="false" onAction="#handleCheckBox" selected="true" text="Player 3" />
+                        <CheckBox fx:id="cbPlayer3" mnemonicParsing="false" onAction="#handleCheckBox" selected="true" text="Player 4" />
+                        <CheckBox fx:id="cbPlayer4" mnemonicParsing="false" onAction="#handleCheckBox" selected="true" text="Player 5" />
                      </children>
                   </VBox>
                   <VBox prefHeight="200.0" prefWidth="100.0" spacing="5.0">
@@ -70,11 +70,11 @@
                               <Font name="System Bold" size="12.0" />
                            </font>
                         </CheckBox>
-                        <CheckBox fx:id="cbPlayer5" mnemonicParsing="false" onAction="#handleCheckBox" selected="true" text="CheckBox" />
-                        <CheckBox fx:id="cbPlayer6" mnemonicParsing="false" onAction="#handleCheckBox" selected="true" text="CheckBox" />
-                        <CheckBox fx:id="cbPlayer7" mnemonicParsing="false" onAction="#handleCheckBox" selected="true" text="CheckBox" />
-                        <CheckBox fx:id="cbPlayer8" mnemonicParsing="false" onAction="#handleCheckBox" selected="true" text="CheckBox" />
-                        <CheckBox fx:id="cbPlayer9" mnemonicParsing="false" onAction="#handleCheckBox" selected="true" text="CheckBox" />
+                        <CheckBox fx:id="cbPlayer5" mnemonicParsing="false" onAction="#handleCheckBox" selected="true" text="Player 6" />
+                        <CheckBox fx:id="cbPlayer6" mnemonicParsing="false" onAction="#handleCheckBox" selected="true" text="Player 7" />
+                        <CheckBox fx:id="cbPlayer7" mnemonicParsing="false" onAction="#handleCheckBox" selected="true" text="Player 8" />
+                        <CheckBox fx:id="cbPlayer8" mnemonicParsing="false" onAction="#handleCheckBox" selected="true" text="Player 9" />
+                        <CheckBox fx:id="cbPlayer9" mnemonicParsing="false" onAction="#handleCheckBox" selected="true" text="Player 10" />
                      </children>
                   </VBox>
                </children>
@@ -88,7 +88,7 @@
                <children>
                   <HBox prefHeight="30.0" prefWidth="200.0" spacing="5.0">
                      <children>
-                        <Slider fx:id="slider" majorTickUnit="300.0" minorTickCount="5" showTickLabels="true" showTickMarks="true" HBox.hgrow="ALWAYS" />
+                        <Slider fx:id="slider" majorTickUnit="300.0" max="300.0" minorTickCount="5" showTickLabels="true" showTickMarks="true" HBox.hgrow="ALWAYS" />
                         <Label fx:id="sliderLabel" text="Label" />
                      </children>
                      <padding>
