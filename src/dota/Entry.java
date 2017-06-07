@@ -75,7 +75,7 @@ public class Entry {
     }
 
     public Integer getRadius() {
-        return 3;
+        return 4;
     }
 
     public boolean isObserver() {
@@ -89,6 +89,8 @@ public class Entry {
     public Color getColor() {
         return isObserver() ? Color.YELLOW : Color.BLUE;
     }
+
+    public Color getTeamColor() { return slot > 4 ? Color.web("#FF0000") : Color.web("00FF00"); }
 
     public String getName() {
         return isObserver() ? "Observer" : "Sentry";
