@@ -16,6 +16,7 @@ import skadistats.clarity.source.InputStreamSource;
 import java.util.*;
 import java.io.IOException;
 import java.io.InputStream;
+import javafx.scene.control.ProgressBar;
 
 public class Parse {
 
@@ -23,6 +24,12 @@ public class Parse {
     final List<Entry> wards = new ArrayList<>();
     Integer gameStartTime = 0;
     Integer gameEndTime = 0;
+    boolean init = false;
+    int numPlayers = 10;
+    int[] validIndices = new int[numPlayers];
+    HashMap<Integer, Long> slot_to_steamid = new HashMap<>();
+    HashMap<Long, Integer> steamid_to_slot = new HashMap<>();
+    HashMap<Long, String> steamid_to_playerName = new HashMap<>();
 
     public Parse(InputStream input) throws IOException
     {
@@ -45,15 +52,15 @@ public class Parse {
         Entry o = findWard(wards, e);
         if (o != null) {
             if (e.isDead()) {
-                System.out.printf("ward expire (%s, %s) %s\n", e.x, e.y, e.ehandle);
+                //System.out.printf("ward expire (%s, %s) %s\n", e.x, e.y, e.ehandle);
                 o.expireTime = e.time;
             }
             else {
-                System.out.printf("ward exists (%s, %s) %s\n", e.x, e.y, e.ehandle);
+                //System.out.printf("ward exists (%s, %s) %s\n", e.x, e.y, e.ehandle);
             }
         }
         else {
-            System.out.printf("ward add (%s, %s) %s\n", e.x, e.y, e.ehandle);
+            //System.out.printf("ward add (%s, %s) %s\n", e.x, e.y, e.ehandle);
             wards.add(e);
         }
     }
@@ -77,6 +84,7 @@ public class Parse {
 
         //s1 DT_DOTAGameRulesProxy
         Entity grp = ctx.getProcessor(Entities.class).getByDtName("CDOTAGamerulesProxy");
+        Entity pr = ctx.getProcessor(Entities.class).getByDtName("CDOTA_PlayerResource");
 
         if (grp != null)
         {
@@ -97,6 +105,45 @@ public class Parse {
                 gameEndTime = currGameEndTime;
                 System.err.println(gameEndTime);
                 System.err.println(time);
+            }
+        }
+        if (pr != null) {
+            //Radiant coach shows up in vecPlayerTeamData as position 5
+            //all the remaining dire entities are offset by 1 and so we miss reading the last one and don't get data for the first dire player
+            //coaches appear to be on team 1, radiant is 2 and dire is 3?
+            //construct an array of valid indices to get vecPlayerTeamData from
+            if (!init) {
+                int added = 0;
+                int i = 0;
+                //according to @Decoud Valve seems to have fixed this issue and players should be in first 10 slots again
+                //sanity check of i to prevent infinite loop when <10 players?
+                while (added < numPlayers && i < 100) {
+                    try {
+                        //check each m_vecPlayerData to ensure the player's team is radiant or dire
+                        int playerTeam = getEntityProperty(pr, "m_vecPlayerData.%i.m_iPlayerTeam", i);
+                        int teamSlot = getEntityProperty(pr, "m_vecPlayerTeamData.%i.m_iTeamSlot", i);
+                        Long steamid = getEntityProperty(pr, "m_vecPlayerData.%i.m_iPlayerSteamID", i);
+                        String playerName = getEntityProperty(pr, "m_vecPlayerData.%i.m_iszPlayerName", i);
+                        //System.err.format("%s %s %s: %s\n", i, playerTeam, teamSlot, steamid);
+                        if (playerTeam == 2 || playerTeam == 3) {
+                            //output the player_slot based on team and teamslot
+                            //add it to validIndices, add 1 to added
+                            validIndices[added] = i;
+                            added += 1;
+                            int slot = playerTeam == 2 ? teamSlot : teamSlot + 5;
+                            slot_to_steamid.put(slot, steamid);
+                            steamid_to_slot.put(steamid, slot);
+                            steamid_to_playerName.put(steamid, playerName);
+                            System.out.printf("%s %s %s\n", slot, steamid, playerName);
+                        }
+                    } catch (Exception e) {
+                        //swallow the exception when an unexpected number of players (!=10)
+                        //System.err.println(e);
+                    }
+
+                    i += 1;
+                }
+                init = true;
             }
         }
     }
@@ -127,7 +174,10 @@ public class Parse {
         boolean isSentry = e.getDtClass().getDtName().equals("CDOTA_NPC_Observer_Ward_TrueSight");
         if (isObserver || isSentry) {
             //System.err.println(e);
-            Entry entry = new Entry(time);
+            Integer owner = getEntityProperty(e, "m_hOwnerEntity", null);
+            Entity ownerEntity = ctx.getProcessor(Entities.class).getByHandle(owner);
+            Integer slot = ownerEntity != null ? (Integer) getEntityProperty(ownerEntity, "m_iPlayerID", null) : null;
+            Entry entry = new Entry(time, isObserver ? "obs" : "sen", slot, steamid_to_playerName.get(slot_to_steamid.get(slot)));
             Integer x = getEntityProperty(e, "CBodyComponent.m_cellX", null);
             Integer y = getEntityProperty(e, "CBodyComponent.m_cellY", null);
             Integer z = getEntityProperty(e, "CBodyComponent.m_cellZ", null);
@@ -139,14 +189,11 @@ public class Parse {
             entry.z = z;
             entry.vecX = vecX;
             entry.vecY = vecY;
-            entry.type = isObserver ? "obs" : "sen";
             entry.key = Arrays.toString(pos);
             entry.entityleft = entityLeft;
             entry.ehandle = e.getHandle();
             //System.err.println(entry.key);
-            Integer owner = getEntityProperty(e, "m_hOwnerEntity", null);
-            Entity ownerEntity = ctx.getProcessor(Entities.class).getByHandle(owner);
-            entry.slot = ownerEntity != null ? (Integer) getEntityProperty(ownerEntity, "m_iPlayerID", null) : null;
+
             //2/3 radiant/dire
             //entry.team = e.getProperty("m_iTeamNum");
             output(entry);

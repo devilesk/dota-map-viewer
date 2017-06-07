@@ -13,7 +13,7 @@ class WardListViewCell extends ListCell<Entry> {
             setGraphic(null);
         }
         else {
-            setText(entry.getTime() + " " + entry.getName());
+            setText(entry.getTime() + " " + entry.getName() + " " + DotaMap.getPlayerName(entry.slot));
             setGraphic(null);
         }
     }
