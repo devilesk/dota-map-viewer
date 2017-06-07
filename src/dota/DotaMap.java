@@ -6,11 +6,14 @@ import javafx.scene.shape.Circle;
 import java.awt.geom.Point2D;
 import javafx.collections.ObservableList;
 import javafx.collections.FXCollections;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.stream.Collectors;
 
 class DotaMap {
-    public static final String mapImage = "dotamap5_25.jpg";
     private static final Integer map_w = 16384;
     private static final Integer map_h = 16384;
     private static final float map_x_min = -8507.4f;
@@ -19,13 +22,25 @@ class DotaMap {
     private static final float map_y_max = -8953.45782627f;
     private Integer zoom_level = 4;
     public static Integer gameStartTime = 0;
+    public Integer filterType = 0;
+    public List<Boolean> playerFilter = new ArrayList<>(Arrays.asList(true, true, true, true, true, true, true, true, true, true));
+    public static HashMap<Integer, Long> slot_to_steamid = new HashMap<>();
+    public static HashMap<Long, Integer> steamid_to_slot = new HashMap<>();
+    public static HashMap<Long, String> steamid_to_playerName = new HashMap<>();
 
     final ObservableList<Entry> wardsView = FXCollections.observableArrayList();
     private List<Entry> wards = null;
 
-    public void initWards(List<Entry> c) {
-        wards = c;
+    public void init(Parse parser) {
+        wards = parser.wards;
         setWards(wards);
+        slot_to_steamid = parser.slot_to_steamid;
+        steamid_to_slot = parser.steamid_to_slot;
+        steamid_to_playerName = parser.steamid_to_playerName;
+    }
+
+    public static String getPlayerName(Integer slot) {
+        return steamid_to_playerName.get(slot_to_steamid.get(slot));
     }
 
     private void setWards(List<Entry> c) {
@@ -33,23 +48,55 @@ class DotaMap {
         wardsView.addAll(c);
     }
 
-    public void filterNone() {
-        setWards(wards);
+    public List<Entry> getWards() {
+        return wards;
     }
 
-    public void filterObserver() {
-        wardsView.clear();
-        wardsView.addAll(wards.stream().filter(o -> !o.isObserver()).collect(Collectors.toList()));
+    public static List<Entry> filterObserver(List<Entry> wards) {
+        return wards.stream().filter(o -> !o.isObserver()).collect(Collectors.toList());
     }
 
-    public void filterSentry() {
-        wardsView.clear();
-        wardsView.addAll(wards.stream().filter(o -> !o.isSentry()).collect(Collectors.toList()));
+    public static List<Entry> filterSentry(List<Entry> wards) {
+        return wards.stream().filter(o -> !o.isSentry()).collect(Collectors.toList());
     }
 
-    public void filterTimeGreaterThan(float t) {
+    public static List<Entry> filterTimeGreaterThan(List<Entry> wards, float t) {
+        return wards.stream().filter(o -> (float) o.time <= t && (o.expireTime == null || (float) o.expireTime > t)).collect(Collectors.toList());
+    }
+
+    public static List<Entry> filterPlayers(List<Entry> wards, List<Boolean> playerFilter) {
+        List<Entry> list = new ArrayList<>();
+        for (Entry o : wards) {
+            if (playerFilter.get(o.slot)) {
+                list.add(o);
+            }
+        }
+        return list;
+    }
+
+    public List<Entry> filter(boolean filterTimeGreaterThan, float t) {
+        List<Entry> c = getWards();
+        if (filterTimeGreaterThan) {
+            c = filterTimeGreaterThan(c, t);
+        }
+        c = filterPlayers(c, playerFilter);
+        switch (filterType) {
+            case 0:
+                return c;
+            case 1:
+                return filterSentry(c);
+            case 2:
+                return filterObserver(c);
+            default:
+                return c;
+        }
+    }
+
+    public void setListView(boolean filterTimeGreaterThan, float t) {
         wardsView.clear();
-        wardsView.addAll(wards.stream().filter(o -> (float) o.time <= t && (o.expireTime == null || (float) o.expireTime > t)).collect(Collectors.toList()));
+        if (wards != null) {
+            wardsView.addAll(filter(filterTimeGreaterThan, t));
+        }
     }
 
     private static float reverseLerp(float minVal, float maxVal, float pos) {

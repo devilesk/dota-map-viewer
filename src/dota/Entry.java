@@ -2,8 +2,9 @@ package dota;
 
 import javafx.scene.paint.Color;
 import java.time.LocalTime;
+import javafx.beans.property.SimpleStringProperty;
 
-class Entry {
+public class Entry {
     public final Integer time;
     public String type;
     public String key;
@@ -17,8 +18,41 @@ class Entry {
     public Integer ehandle;
     public Integer expireTime;
 
-    public Entry(Integer time) {
+    private final SimpleStringProperty propTime;
+    private final SimpleStringProperty propType;
+    private final SimpleStringProperty propPlayerName;
+
+    public Entry(Integer time, String type, Integer slot, String playerName) {
         this.time = time;
+        this.type = type;
+        this.slot = slot;
+        propTime = new SimpleStringProperty(getTime());
+        propType = new SimpleStringProperty(getName());
+        propPlayerName = new SimpleStringProperty(playerName);
+    }
+
+    public String getPropTime() {
+        return propTime.get();
+    }
+
+    public String getPropType() {
+        return propType.get();
+    }
+
+    public String getPropPlayerName() {
+        return propPlayerName.get();
+    }
+
+    public void setPropTime(String s) {
+        propTime.set(s);
+    }
+
+    public void setPropType(String s) {
+        propType.set(s);
+    }
+
+    public void setPropPlayerName(String s) {
+        propPlayerName.set(s);
     }
 
     public String getTime() {

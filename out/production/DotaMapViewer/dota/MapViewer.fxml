@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.CheckBox?>
+<?import javafx.scene.control.ChoiceBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.Menu?>
+<?import javafx.scene.control.MenuBar?>
+<?import javafx.scene.control.MenuItem?>
+<?import javafx.scene.control.ProgressBar?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.SeparatorMenuItem?>
+<?import javafx.scene.control.Slider?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
+
+<VBox prefHeight="400.0" prefWidth="640.0" xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1" fx:controller="dota.MapViewer">
+  <children>
+    <MenuBar VBox.vgrow="NEVER">
+      <menus>
+        <Menu mnemonicParsing="false" text="File">
+          <items>
+            <MenuItem mnemonicParsing="false" onAction="#handleOpen" text="Open…" />
+            <SeparatorMenuItem mnemonicParsing="false" />
+            <MenuItem mnemonicParsing="false" onAction="#handleQuit" text="Quit" />
+          </items>
+        </Menu>
+        <Menu mnemonicParsing="false" text="Help">
+          <items>
+            <MenuItem mnemonicParsing="false" text="About Dota Map Viewer" />
+          </items>
+        </Menu>
+      </menus>
+    </MenuBar>
+      <BorderPane prefHeight="200.0" prefWidth="200.0" VBox.vgrow="ALWAYS">
+         <left>
+            <VBox prefHeight="200.0" prefWidth="150.0" spacing="10.0" BorderPane.alignment="CENTER">
+               <children>
+                  <VBox prefHeight="59.0" prefWidth="90.0">
+                     <children>
+                        <Label text="Ward Type" />
+                        <ChoiceBox fx:id="wardTypeFilter" prefWidth="150.0" />
+                     </children>
+                  </VBox>
+                  <VBox prefHeight="131.0" prefWidth="90.0" spacing="5.0">
+                     <children>
+                        <CheckBox fx:id="cbRadiant" mnemonicParsing="false" onAction="#handleCheckBox" selected="true" text="Radiant">
+                           <font>
+                              <Font name="System Bold" size="12.0" />
+                           </font>
+                        </CheckBox>
+                        <CheckBox fx:id="cbPlayer0" mnemonicParsing="false" onAction="#handleCheckBox" selected="true" text="CheckBox" />
+                        <CheckBox fx:id="cbPlayer1" mnemonicParsing="false" onAction="#handleCheckBox" selected="true" text="CheckBox" />
+                        <CheckBox fx:id="cbPlayer2" mnemonicParsing="false" onAction="#handleCheckBox" selected="true" text="CheckBox" />
+                        <CheckBox fx:id="cbPlayer3" mnemonicParsing="false" onAction="#handleCheckBox" selected="true" text="CheckBox" />
+                        <CheckBox fx:id="cbPlayer4" mnemonicParsing="false" onAction="#handleCheckBox" selected="true" text="CheckBox" />
+                     </children>
+                  </VBox>
+                  <VBox prefHeight="200.0" prefWidth="100.0" spacing="5.0">
+                     <children>
+                        <CheckBox fx:id="cbDire" mnemonicParsing="false" onAction="#handleCheckBox" selected="true" text="Dire">
+                           <font>
+                              <Font name="System Bold" size="12.0" />
+                           </font>
+                        </CheckBox>
+                        <CheckBox fx:id="cbPlayer5" mnemonicParsing="false" onAction="#handleCheckBox" selected="true" text="CheckBox" />
+                        <CheckBox fx:id="cbPlayer6" mnemonicParsing="false" onAction="#handleCheckBox" selected="true" text="CheckBox" />
+                        <CheckBox fx:id="cbPlayer7" mnemonicParsing="false" onAction="#handleCheckBox" selected="true" text="CheckBox" />
+                        <CheckBox fx:id="cbPlayer8" mnemonicParsing="false" onAction="#handleCheckBox" selected="true" text="CheckBox" />
+                        <CheckBox fx:id="cbPlayer9" mnemonicParsing="false" onAction="#handleCheckBox" selected="true" text="CheckBox" />
+                     </children>
+                  </VBox>
+               </children>
+               <padding>
+                  <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+               </padding>
+            </VBox>
+         </left>
+         <bottom>
+            <VBox prefHeight="0.0" prefWidth="1289.0" BorderPane.alignment="CENTER">
+               <children>
+                  <HBox prefHeight="30.0" prefWidth="200.0" spacing="5.0">
+                     <children>
+                        <Slider fx:id="slider" majorTickUnit="300.0" minorTickCount="5" showTickLabels="true" showTickMarks="true" HBox.hgrow="ALWAYS" />
+                        <Label fx:id="sliderLabel" text="Label" />
+                     </children>
+                     <padding>
+                        <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+                     </padding>
+                  </HBox>
+                  <ProgressBar fx:id="progressBar" maxWidth="1.7976931348623157E308" prefHeight="18.0" progress="0.0" VBox.vgrow="ALWAYS" />
+               </children>
+            </VBox>
+         </bottom>
+         <center>
+            <HBox prefHeight="100.0" prefWidth="200.0" BorderPane.alignment="CENTER">
+               <children>
+                  <TableView fx:id="tableView" maxHeight="1.7976931348623157E308" maxWidth="350.0" minHeight="-Infinity" prefWidth="350.0" HBox.hgrow="NEVER">
+                    <columns>
+                      <TableColumn fx:id="colType" minWidth="75.0" prefWidth="75.0" resizable="false" text="Type" />
+                      <TableColumn fx:id="colTime" minWidth="75.0" prefWidth="75.0" resizable="false" text="Time" />
+                        <TableColumn fx:id="colPlayer" minWidth="200.0" prefWidth="200.0" text="Player" />
+                    </columns>
+                     <columnResizePolicy>
+                        <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
+                     </columnResizePolicy>
+                  </TableView>
+                  <AnchorPane prefHeight="200.0" prefWidth="200.0" HBox.hgrow="ALWAYS">
+                     <children>
+                        <ScrollPane pannable="true" prefViewportHeight="1024.0" prefViewportWidth="1024.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                           <content>
+                              <AnchorPane fx:id="mapRegion" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="1024.0" minWidth="1024.0" prefHeight="1024.0" prefWidth="1024.0">
+                                 <children>
+                                    <ImageView fx:id="mapBackground" fitHeight="1024.0" fitWidth="1024.0" pickOnBounds="true" preserveRatio="true" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                       <image>
+                                          <Image url="@dotamap5_25.jpg" />
+                                       </image>
+                                    </ImageView>
+                                 </children>
+                              </AnchorPane>
+                           </content>
+                        </ScrollPane>
+                     </children>
+                  </AnchorPane>
+               </children>
+            </HBox>
+         </center>
+      </BorderPane>
+  </children>
+</VBox>
