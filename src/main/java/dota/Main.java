@@ -14,7 +14,9 @@ public class Main extends Application {
 
     @Override
     public void start(Stage primaryStage) throws Exception {
-        FXMLLoader loader = new FXMLLoader(getClass().getResource("MapViewer.fxml"));
+        Class c = getClass();
+        java.net.URL resource = c.getResource("/MapViewer.fxml");
+        FXMLLoader loader = new FXMLLoader(resource);
         Parent root = loader.load();
         MapViewer controller = loader.getController();
         controller.setStageAndSetupListeners(primaryStage);
