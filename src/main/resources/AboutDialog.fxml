@@ -7,7 +7,7 @@
 
 <VBox maxWidth="1.7976931348623157E308" minWidth="-Infinity" prefHeight="200.0" prefWidth="400.0" spacing="5.0" xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1" fx:controller="dota.AboutDialog">
    <children>
-      <TextArea editable="false" prefHeight="130.0" prefWidth="275.0" text="Powered by&#10;https://github.com/skadistats/clarity&#10;https://github.com/odota/parser&#10;&#10;&#10;&#10;&#10;© 2017 devilesk" VBox.vgrow="ALWAYS" />
+      <TextArea editable="false" prefHeight="130.0" prefWidth="275.0" text="Dota Map Viewer&#10;https://github.com/devilesk/dota-map-viewer&#10;&#10;Powered by&#10;https://github.com/skadistats/clarity&#10;https://github.com/odota/parser&#10;&#10;&#10;© 2017 devilesk" VBox.vgrow="ALWAYS" />
       <Button fx:id="closeButton" mnemonicParsing="false" onAction="#handleClose" prefWidth="100.0" text="Close" />
    </children>
    <padding>

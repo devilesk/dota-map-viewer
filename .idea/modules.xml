@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/DotaMapViewer.iml" filepath="$PROJECT_DIR$/DotaMapViewer.iml" />
+      <module fileurl="file://$PROJECT_DIR$/dota-map-viewer.iml" filepath="$PROJECT_DIR$/dota-map-viewer.iml" />
     </modules>
   </component>
 </project>
