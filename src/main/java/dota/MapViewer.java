@@ -185,7 +185,7 @@ public class MapViewer {
     }
 
     public void handleAbout(ActionEvent actionEvent) throws IOException {
-        FXMLLoader loader = new FXMLLoader(getClass().getResource("AboutDialog.fxml"));
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("/AboutDialog.fxml"));
         Parent root = loader.load();
         Stage stage = new Stage();
         stage.setScene(new Scene(root));
